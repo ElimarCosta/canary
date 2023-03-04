@@ -326,7 +326,7 @@ void Npc::onPlayerSellItem(Player* player, uint16_t itemId, uint8_t subType, uin
 		return;
 	}
 
-	auto totalCost = static_cast<uint64_t>(sellPrice * amount);
+	auto totalCost = static_cast<uint64_t>(sellPrice * removedItems);
 	g_game().addMoney(player, totalCost);
 
 	// npc:onSellItem(player, itemId, subType, amount, ignore, itemName, totalCost)
@@ -336,7 +336,7 @@ void Npc::onPlayerSellItem(Player* player, uint16_t itemId, uint8_t subType, uin
 		callback.pushCreature(player);
 		callback.pushNumber(itemType.id);
 		callback.pushNumber(subType);
-		callback.pushNumber(amount);
+		callback.pushNumber(removedItems);
 		callback.pushBoolean(ignore);
 		callback.pushString(itemType.name);
 		callback.pushNumber(totalCost);
