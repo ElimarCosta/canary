@@ -663,7 +663,7 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 	const Position startPos = pos;
 
 	AStarNode* found = nullptr;
-	while (fpp.maxSearchDist != 0 || nodes.getClosedNodes() < 100) {
+	do {
 		AStarNode* n = nodes.getBestNode();
 		if (!n) {
 			if (found) {
@@ -741,6 +741,7 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 					continue;
 				}
 			}
+			//g_game().addMagicEffect(pos, CONST_ME_POFF);
 
 			// The cost (g) for this neighbor
 			const int_fast32_t cost = AStarNodes::getMapWalkCost(n, pos);
@@ -748,6 +749,7 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 			// (h)
 			auto manhattanHeuristic = std::abs(pathCondition.targetPos.x - pos.x) + std::abs(pathCondition.targetPos.y - pos.y);
 			const int_fast32_t newf = cost * manhattanHeuristic + f + extraCost;
+			//SPDLOG_WARN("NEW F {}", newf);
 
 			if (neighborNode) {
 				if (neighborNode->f <= newf) {
@@ -771,7 +773,7 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 		}
 
 		nodes.closeNode(n);
-	}
+	} while (fpp.maxSearchDist != 0 || nodes.getClosedNodes() < 100);
 
 	if (!found) {
 		return false;
