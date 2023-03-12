@@ -645,6 +645,7 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 	AStarNodes nodes(pos.x, pos.y);
 
 	int32_t bestMatch = 0;
+	uint8_t allowedDirections = fpp.allowDiagonal ? 5 : 3;
 
 	static int_fast32_t dirNeighbors[8][5][2] = {
 		{ { -1, 0 }, { 0, 1 }, { 1, 0 }, { 1, 1 }, { -1, 1 } },
@@ -712,13 +713,14 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 			} else {
 				neighbors = *dirNeighbors[DIRECTION_SOUTHEAST];
 			}
-			dirCount = fpp.allowDiagonal ? 5 : 3;
+			dirCount = allowedDirections;
 		} else {
 			dirCount = 8;
 			neighbors = *allNeighbors;
 		}
 
 		const int_fast32_t f = n->f;
+		const int_fast32_t g = n->g;
 		for (uint_fast32_t i = 0; i < dirCount; ++i) {
 			pos.x = x + *neighbors++;
 			pos.y = y + *neighbors++;
@@ -741,15 +743,15 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 					continue;
 				}
 			}
-			//g_game().addMagicEffect(pos, CONST_ME_POFF);
+			g_game().addMagicEffect(pos, CONST_ME_POFF);
 
 			// The cost (g) for this neighbor
 			const int_fast32_t cost = AStarNodes::getMapWalkCost(n, pos);
 			const int_fast32_t extraCost = AStarNodes::getTileWalkCost(creature, tile);
+			const int_fast32_t newg = cost + g + extraCost;
 			// (h)
 			auto manhattanHeuristic = std::abs(pathCondition.targetPos.x - pos.x) + std::abs(pathCondition.targetPos.y - pos.y);
-			const int_fast32_t newf = cost * manhattanHeuristic + f + extraCost;
-			//SPDLOG_WARN("NEW F {}", newf);
+			const int_fast32_t newf = newg + manhattanHeuristic;
 
 			if (neighborNode) {
 				if (neighborNode->f <= newf) {
@@ -758,11 +760,12 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 				}
 
 				neighborNode->f = newf;
+				neighborNode->g = newg;
 				neighborNode->parent = n;
 				nodes.openNode(neighborNode);
 			} else {
 				// Does not exist in the open/closed list, create a new node
-				neighborNode = nodes.createOpenNode(n, pos.x, pos.y, newf);
+				neighborNode = nodes.createOpenNode(n, pos.x, pos.y, newf, newg);
 				if (!neighborNode) {
 					if (found) {
 						break;
@@ -936,7 +939,7 @@ bool Map::getPathMatching(const Position &start, std::forward_list<Direction> &d
 				nodes.openNode(neighborNode);
 			} else {
 				// Does not exist in the open/closed list, create a new node
-				neighborNode = nodes.createOpenNode(n, pos.x, pos.y, newf);
+				neighborNode = nodes.createOpenNode(n, pos.x, pos.y, newf, 0);
 				if (!neighborNode) {
 					if (found) {
 						break;
@@ -1003,10 +1006,11 @@ AStarNodes::AStarNodes(uint32_t x, uint32_t y) :
 	startNode.x = x;
 	startNode.y = y;
 	startNode.f = 0;
+	startNode.g = 0;
 	nodeTable[(x << 16) | y] = nodes;
 }
 
-AStarNode* AStarNodes::createOpenNode(AStarNode* parent, uint32_t x, uint32_t y, int_fast32_t f) {
+AStarNode* AStarNodes::createOpenNode(AStarNode* parent, uint32_t x, uint32_t y, int_fast32_t f, int_fast32_t g) {
 	if (curNode >= MAX_NODES) {
 		return nullptr;
 	}
@@ -1020,6 +1024,7 @@ AStarNode* AStarNodes::createOpenNode(AStarNode* parent, uint32_t x, uint32_t y,
 	node->x = x;
 	node->y = y;
 	node->f = f;
+	node->g = g;
 	return node;
 }
 

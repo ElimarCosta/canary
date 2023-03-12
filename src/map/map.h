@@ -31,21 +31,21 @@ static constexpr int8_t MAP_LAYER_VIEW_LIMIT = 2;
 struct FindPathParams;
 struct AStarNode {
 		AStarNode* parent;
-		int_fast32_t f;
+		int_fast32_t f, g;
 		uint16_t x, y;
 };
 
 static constexpr int32_t MAX_NODES = 512;
 
 static constexpr int32_t MAP_NORMALWALKCOST = 1;
-static constexpr int32_t MAP_PREFERDIAGONALWALKCOST = 5;
-static constexpr int32_t MAP_DIAGONALWALKCOST = 7;
+static constexpr int32_t MAP_PREFERDIAGONALWALKCOST = 2;
+static constexpr int32_t MAP_DIAGONALWALKCOST = 3;
 
 class AStarNodes {
 	public:
 		AStarNodes(uint32_t x, uint32_t y);
 
-		AStarNode* createOpenNode(AStarNode* parent, uint32_t x, uint32_t y, int_fast32_t f);
+		AStarNode* createOpenNode(AStarNode* parent, uint32_t x, uint32_t y, int_fast32_t f, int_fast32_t g);
 		AStarNode* getBestNode();
 		void closeNode(AStarNode* node);
 		void openNode(AStarNode* node);
