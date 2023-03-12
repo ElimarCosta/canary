@@ -750,8 +750,13 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 			const int_fast32_t extraCost = AStarNodes::getTileWalkCost(creature, tile);
 			const int_fast32_t newg = cost + g + extraCost;
 			// (h)
-			auto manhattanHeuristic = std::abs(pathCondition.targetPos.x - pos.x) + std::abs(pathCondition.targetPos.y - pos.y);
-			const int_fast32_t newf = newg + manhattanHeuristic;
+			//auto manhattanHeuristic = std::abs(pathCondition.targetPos.x - pos.x) + std::abs(pathCondition.targetPos.y - pos.y);
+			auto dx = std::abs(pathCondition.targetPos.x - pos.x);
+			auto dy = std::abs(pathCondition.targetPos.y - pos.y);
+			auto minDelta = std::min(dx, dy);
+			auto octileHeuristic = MAP_DIAGONALWALKCOST * minDelta + (3.16 - 2 * minDelta);
+
+			const int_fast32_t newf = newg + octileHeuristic;
 
 			if (neighborNode) {
 				if (neighborNode->f <= newf) {
