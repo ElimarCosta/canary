@@ -751,8 +751,8 @@ bool Map::getPathMatching(const Creature &creature, std::forward_list<Direction>
 			const int_fast32_t newg = cost + g + extraCost;
 			// (h)
 			// auto manhattanHeuristic = std::abs(pathCondition.targetPos.x - pos.x) + std::abs(pathCondition.targetPos.y - pos.y);
-			//auto octileHeuristic = MAP_DIAGONALWALKCOST * std::min(dx, dy) + (3.16 - 2 * minDelta);
-			//auto euclideanHeuristic = std::max(dx, dy) + MAP_DIAGONALWALKCOST * std::min(dx, dy);
+			// auto octileHeuristic = MAP_DIAGONALWALKCOST * std::min(dx, dy) + (3.16 - 2 * minDelta);
+			// auto euclideanHeuristic = std::max(dx, dy) + MAP_DIAGONALWALKCOST * std::min(dx, dy);
 			auto dx = std::abs(pathCondition.targetPos.x - pos.x);
 			auto dy = std::abs(pathCondition.targetPos.y - pos.y);
 			auto octileHeuristic = std::max(dx, dy) + 1.41421 * std::min(dx, dy);
